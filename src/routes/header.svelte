@@ -10,7 +10,7 @@
 		<div class="header">
 			<div class="logo">
 				<a href="/">
-					<h3 class="text">ShyNo.me</h3>
+					<h3 class="text">shyno.me</h3>
 				</a>
 			</div>
 			<nav>

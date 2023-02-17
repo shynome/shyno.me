@@ -1,7 +1,7 @@
 <footer>
 	<div class="container">
 		<div class="home-link">
-			<a href="https://shyno.me">ShyNo.me</a>
+			<a href="https://shyno.me">shyno.me</a>
 		</div>
 	</div>
 </footer>
