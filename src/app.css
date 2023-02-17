@@ -1,0 +1,14 @@
+@import 'normalize.css';
+@import 'milligram';
+
+:root {
+	--main-bg: #fff;
+	--second-bg: #f9f9f9;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100vh;
+}
