@@ -3,6 +3,7 @@
 		{ name: 'Index', link: '/' },
 		{ name: 'Blog', link: '/blog' },
 	];
+	import Shynome from '$lib/shynome.svelte';
 </script>
 
 <header>
@@ -10,7 +11,9 @@
 		<div class="header">
 			<div class="logo">
 				<a href="/">
-					<h3 class="text">shyno.me</h3>
+					<h3 class="text">
+						<Shynome />
+					</h3>
 				</a>
 			</div>
 			<nav>
@@ -27,6 +30,10 @@
 		display: flex;
 		align-items: center;
 		padding: 2rem 0;
+	}
+	.logo .text :global(svg) {
+		height: 4rem;
+		margin-bottom: -1rem;
 	}
 	.logo .text,
 	hr {
