@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>欢迎来到shynome的隐藏博客</title>
+</svelte:head>
+
 <div class="home">
 	<div>
 		<h2>Hello World</h2>

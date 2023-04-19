@@ -3,6 +3,10 @@
 	export let data: Data;
 </script>
 
+<svelte:head>
+	<title>文章列表</title>
+</svelte:head>
+
 <div class="container">
 	{#each data.years as year}
 		<dl>

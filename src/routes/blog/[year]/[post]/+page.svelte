@@ -7,6 +7,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{data.attrs.title}</title>
+</svelte:head>
+
 <div class="container">
 	<article>
 		<header>
