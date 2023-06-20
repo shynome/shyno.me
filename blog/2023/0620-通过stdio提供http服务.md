@@ -33,7 +33,7 @@ import (
 	"os"
 
 	"github.com/shynome/err4"
-	"github.com/xtaci/smux"
+	smux "github.com/hashicorp/yamux"
 )
 
 func main() {
@@ -115,7 +115,7 @@ import (
 	"os/exec"
 
 	"github.com/shynome/err4"
-	"github.com/xtaci/smux"
+	smux "github.com/hashicorp/yamux"
 )
 
 type Stdio struct {
