@@ -28,12 +28,11 @@ package main
 import (
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"os"
 
-	"github.com/shynome/err4"
 	smux "github.com/hashicorp/yamux"
+	"github.com/shynome/err4"
 )
 
 func main() {
@@ -48,8 +47,7 @@ func main() {
 		io.WriteString(w, "hello world")
 	})
 
-	var l net.Listener = &StdioListener{session: session}
-	qTry = http.Serve(l, nil)
+	qTry = http.Serve(session, nil)
 }
 
 type Stdio struct {
@@ -60,43 +58,6 @@ type Stdio struct {
 var _ io.ReadWriteCloser = (*Stdio)(nil)
 
 func (i Stdio) Close() error { return nil }
-
-type StdioListener struct {
-	session *smux.Session
-	code    int
-}
-
-var _ net.Listener = (*StdioListener)(nil)
-
-func (l *StdioListener) Accept() (conn net.Conn, qTry error) {
-	defer err4.Handle(&qTry)(func() {
-		log.Println("e2 accept", qTry)
-	})
-	stream, qTry := l.session.AcceptStream()
-	conn = &StdioConn{stream}
-	return
-}
-
-func (l *StdioListener) Close() error { return nil }
-
-func (StdioListener) Addr() net.Addr { return StdioAddr("stdio") }
-
-type StdioConn struct {
-	*smux.Stream
-}
-
-var _ net.Conn = (*StdioConn)(nil)
-
-func (conn StdioConn) RemoteAddr() net.Addr {
-	return StdioAddr("stdin")
-}
-
-type StdioAddr string
-
-var _ net.Addr = (*StdioAddr)(nil)
-
-func (StdioAddr) Network() string { return "stdio" }
-func (StdioAddr) String() string  { return "process" }
 
 ```
 
