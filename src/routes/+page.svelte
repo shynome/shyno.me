@@ -4,7 +4,7 @@
 
 <div class="home">
 	<div>
-		<h2>Hello World</h2>
+		<h2>Less is More</h2>
 		<div>
 			<a class="button button-outline" href="/blog">Goto Blog</a>
 		</div>
