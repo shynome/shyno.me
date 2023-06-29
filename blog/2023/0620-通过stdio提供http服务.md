@@ -16,13 +16,25 @@ title: smux 太酷啦, 通过 stdio 提供 http 服务
 
 不过快上工了, 今天就先写到这
 
+## 优化后的性能
+
+caddy 反代后有 5013 req/s, 直连有 5844 req/s, 简直强到逆天.
+
+选的 runtime 是编译器(Compiler), 如果选解释器(Interpreter)的话也是只有 200 req/s.
+
+性能翻了 25 倍
+
+如果使用 shell 调用的话, 为 120435 req/s, 是 wasi 单核调用的 20 倍
+
+如果直接监听 tcp 端口的话, 为 212072 req/s, 是 shell 调用的 1.76 倍, wasi 单核调用的 36 倍
+
+ps: wasi 开多进程多核处理的性能测试, 留到下个项目来测试吧. 我的电脑是 16 核的. 用的 wrk 测试
+
 ## 代码示意
 
 使用 stdio 提供 http 服务的代码实现
 
 ```go
-//go:build err4
-
 package main
 
 import (
@@ -32,22 +44,18 @@ import (
 	"os"
 
 	smux "github.com/hashicorp/yamux"
-	"github.com/shynome/err4"
+	"github.com/lainio/err2/try"
 )
 
 func main() {
-	var qTry error
-	defer err4.Handle(&qTry)(func() {
-		log.Println("e2 main", qTry)
-	})
 	stdio := &Stdio{Reader: os.Stdin, Writer: os.Stdout}
-	session, qTry := smux.Server(stdio, nil)
+	session := try.To1(smux.Server(stdio, nil))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "hello world")
 	})
 
-	qTry = http.Serve(session, nil)
+	try.To(http.Serve(session, nil))
 }
 
 type Stdio struct {
@@ -64,8 +72,6 @@ func (i Stdio) Close() error { return nil }
 调用端
 
 ```go
-//go:build err4
-
 package main
 
 import (
@@ -75,9 +81,44 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/shynome/err4"
+	"github.com/lainio/err2/try"
 	smux "github.com/hashicorp/yamux"
 )
+
+func main() {
+
+	cmd := exec.Command("go", "run", "./example2")
+	cmdIn, cmdWriter := io.Pipe()
+	cmdReader, cmdOut := io.Pipe()
+	var stdio = &Stdio{Reader: cmdReader, Writer: cmdWriter}
+	cmd.Stdin = cmdIn
+	cmd.Stdout = cmdOut
+	cmd.Stderr = os.Stderr
+
+	try.To1(cmd.Start())
+
+	session := try.To1(smux.Client(stdio, nil))
+
+	l := try.To1(net.Listen("tcp", ":6060"))
+	defer l.Close()
+
+	for {
+		var conn net.Conn
+		conn, qTry = l.Accept()
+		go func(conn net.Conn) (qTry error) {
+			defer err4.Handle(&qTry)(func() {
+				log.Println("conn", qTry)
+			})
+
+			defer conn.Close()
+			stream, qTry := session.OpenStream()
+			go io.Copy(stream, conn)
+			_, qTry = io.Copy(conn, stream)
+			return
+		}(conn)
+	}
+
+}
 
 type Stdio struct {
 	io.Reader
@@ -85,50 +126,4 @@ type Stdio struct {
 }
 
 func (Stdio) Close() error { return nil }
-
-func main() {
-	var qTry error
-	err4.Handle(&qTry)(func() {
-		log.Fatalln("wgo", qTry)
-	})
-
-	cmd := exec.Command("go", "run", "./example2")
-	cmdIn, cmdWriter := io.Pipe()
-	cmdReader, cmdOut := io.Pipe()
-	var stdio = &Stdio{
-		Reader: cmdReader,
-		Writer: cmdWriter,
-	}
-	cmd.Stdin = cmdIn
-	cmd.Stdout = cmdOut
-	cmd.Stderr = os.Stderr
-
-	qTry = cmd.Start()
-
-	session, qTry := smux.Client(stdio, nil)
-
-	l, qTry := net.Listen("tcp", ":6060")
-	defer l.Close()
-
-	go func() {
-		for {
-			var conn net.Conn
-			conn, qTry = l.Accept()
-			go func(conn net.Conn) (qTry error) {
-				defer err4.Handle(&qTry)(func() {
-					log.Println("conn", qTry)
-				})
-
-				defer conn.Close()
-				stream, qTry := session.OpenStream()
-				go io.Copy(stream, conn)
-				_, qTry = io.Copy(conn, stream)
-				return
-			}(conn)
-		}
-	}()
-
-	qTry = cmd.Wait()
-}
-
 ```
