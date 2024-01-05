@@ -6,9 +6,9 @@ tags: ['软路由', 'openwrt', 'qemu', 'n100', '虚拟化']
 ## 起
 
 最近看了很多软路由的视频, 让我对我的二手软路由 J1900 的不满越来越大,
-最终购入了 4 个 2.5G 网口的 n100
+最终购入了 4 个 2.5G 网口的 N100
 
-虽然我现有的家庭网络环境只支持 1G, 落入了消费主义陷阱呢(消费才能彰显自己的价值), 苦笑
+虽然我现有的家庭网络环境只支持 1G, 落入了消费主义陷阱呢(消费才能彰显自己的价值), 笑
 
 #### 两个软路由配置对比
 
@@ -74,11 +74,11 @@ N100 性能溢出这么多当然要用来跑虚拟机呀
 
 选了几种方案, 最后选中了 [QEMU](https://openwrt.org/docs/guide-user/virtualization/qemu_host)
 
-我最后的运行脚本长这样 `./run_debian`
+我最后的运行脚本长这样 `./run_debian`. 记得至少留 500m 给 openwrt
 
 ```sh
 exec qemu-system-x86_64 -enable-kvm \
-  -cpu host -smp 4 -m 3.5G \
+  -cpu host -smp 4 -m 3G \
   -drive file=debian.img,if=virtio \
   -device virtio-net-pci,mac=E2:F2:6A:01:9D:C9,netdev=br0 -netdev bridge,br=br-lan,id=br0 \
   -daemonize \
