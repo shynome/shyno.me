@@ -23,8 +23,8 @@ golang 的 http server 简洁易用, 可以很简单的切到 cgi 模式下, 但
 |         |    大小 |  qps |
 | ------- | ------: | ---: |
 | as      | 22.05KB | 3082 |
-| go cgi  |  9.38MB | 2305 |
-| go wcgi |  9.38MB |   85 |
+| go cgi  |  9.38MB |   85 |
+| go wcgi |  9.38MB | 2305 |
 
 `Assembly Script` 的手搓 cgi 模式有 3082 qps, 手搓 cgi 简单但手搓网络请求就不简单, 所以还是选择了继续使用 go
 
